@@ -1,5 +1,3 @@
-# Introduction
-
 `run_analysis.R` is a script that tidies the dataset provided for the course project of the coursera course ´Getting and Cleaning data´ 
 
 The raw data can be obtained here:
@@ -21,27 +19,27 @@ The data is tidied based on the following guidelines:
 The steps taken in the tidying are:
 * Merging similar datasets with 'rbind' eg, ´x´ data with ´x´ data and ´y´data with ´y´ data.
 * Selection of the columns containing mean and standard deviation sets.
-* Correctly naming the columns using the descriptive names from the ´features.txt´ file.
+* Correctly naming the columns using the descriptive names from the `features.txt` file.
 * Replacing the numerical activity label with the activity name from the `activity_labels.txt` file.
 * Replacing non-descriptive column names.
-* Creation of a data set with only the average measures for each subject and activity type. The data set is written to disk as 'DATA_avg.txt´ in the working directory.
+* Creation of a data set with only the average measures for each subject and activity type. The data set is written to disk as `DATA_avg.txt` in the working directory.
 
 * Raw data from the downloaded files is contained in:
 `DATA_train_x`, `DATA_train_y`, `DATA_test_x`, `DATA_test_y`, `SUBJECTS_train` and `SUBJECTS_test`.
 * These raw data sets are merged into:
-'DATA_x', 'DATA_y' and 'SUBJECTS_data'
-* As the x data set does not have names as such, the names of the columns are stored in:
-'NAMES'
+`DATA_x`, `DATA_y` and `SUBJECTS_data`
+* As the x data set does not have names as such, the names of the columns are stored in: 
+`NAMES`
 * This is later used to make a numerical vector for the selection of the specified columns (containing mean and std)
 * The selection is stored in:
-'SELECTION'
+`SELECTION`
 
 * The activity labels are replaced in a similar approach.
 
 * All data is then merged into:
-'DATA_set'
+`DATA_set`
 
 * As per guideline, the averages are calculated and these are stored in:
-'DATA_avg'
+`DATA_avg`
 * After this it is written to disc as a .txt file with the same name in the working directory
 
