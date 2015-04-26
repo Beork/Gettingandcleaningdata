@@ -1,45 +1,63 @@
-`run_analysis.R` is a script that tidies the dataset provided for the course project of the coursera course ´Getting and Cleaning data´ 
+# add the dplyr library
+library(dplyr)
 
-The raw data can be obtained here:
-https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+########## Merge the training and test sets to create one data set
 
-A description of the data can be found here:
-http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+# read train data
+DATA_train_x <- read.table("./UCI_HAR_Dataset/train/X_train.txt")
+DATA_train_y <- read.table("./UCI_HAR_Dataset/train/y_train.txt")
+SUBJECTS_train <- read.table("./UCI_HAR_Dataset/train/subject_train.txt")
 
+# read test data
+DATA_test_x <- read.table("./UCI_HAR_Dataset/test/X_test.txt")
+DATA_test_y <- read.table("./UCI_HAR_Dataset/test/y_test.txt")
+SUBJECTS_test <- read.table("./UCI_HAR_Dataset/test/subject_test.txt")
 
-The data is tidied based on the following guidelines:
+# bind 'x' data for train and test
+DATA_x <- rbind(DATA_train_x, DATA_test_x)
 
-* You should create one R script called run_analysis.R that does the following. 
-* Merges the training and the test sets to create one data set.
-* Extracts only the measurements on the mean and standard deviation for each measurement. 
-* Uses descriptive activity names to name the activities in the data set
-* Appropriately labels the data set with descriptive variable names. 
-* From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+# bind 'y' data for train and test
+DATA_y <- rbind(DATA_train_y, DATA_test_y)
 
-The steps taken in the tidying are:
-* Merging similar datasets with 'rbind' eg, ´x´ data with ´x´ data and ´y´data with ´y´ data.
-* Selection of the columns containing mean and standard deviation sets.
-* Correctly naming the columns using the descriptive names from the `features.txt` file.
-* Replacing the numerical activity label with the activity name from the `activity_labels.txt` file.
-* Replacing non-descriptive column names.
-* Creation of a data set with only the average measures for each subject and activity type. The data set is written to disk as `DATA_avg.txt` in the working directory.
+# create 'subject' data set
+SUBJECTS_data <- rbind(SUBJECTS_train, SUBJECTS_test)
+# Change name into descriptive name
+names(SUBJECTS_data) <- "subject"
 
-* Raw data from the downloaded files is contained in:
-`DATA_train_x`, `DATA_train_y`, `DATA_test_x`, `DATA_test_y`, `SUBJECTS_train` and `SUBJECTS_test`.
-* These raw data sets are merged into:
-`DATA_x`, `DATA_y` and `SUBJECTS_data`
-* As the x data set does not have names as such, the names of the columns are stored in: 
-`NAMES`
-* This is later used to make a numerical vector for the selection of the specified columns (containing mean and std)
-* The selection is stored in:
-`SELECTION`
+########## Extract only the measurements on the mean and standard deviation for 
+########## each measurement
+# Create a table containing the descriptive names
+NAMES <- read.table("./UCI_HAR_Dataset/features.txt")
 
-* The activity labels are replaced in a similar approach.
+# Select only mean() and std() columns. '()' was used in the selection criteria 
+# because mean and std sets always had '()', whereas some variables contained 
+# 'mean' in the name, but did not have a corresponding 'std'. 
+SELECTION <- grep("-(mean|std)\\(\\)", NAMES[, 2])
 
-* All data is then merged into:
-`DATA_set`
+# Select data based on SELECTION made one step before
+DATA_x <- DATA_x[, SELECTION]
 
-* As per guideline, the averages are calculated and these are stored in:
-`DATA_avg`
-* After this it is written to disc as a .txt file with the same name in the working directory
+# Change names to descriptive names
+names(DATA_x) <- NAMES[SELECTION, 2]
 
+###### Use descriptive activity names to name the activities in the data set
+# Create table with the proper names of the activities
+ACTIVITY_labels <- read.table("./UCI_HAR_Dataset/activity_labels.txt")
+
+# Add these labels to the corresponding dataset
+DATA_y[, 1] <- ACTIVITY_labels[DATA_y[, 1], 2]
+
+# Change name into descriptive name
+names(DATA_y) <- "activity"
+
+# Create a single data set containing all selected data. 
+DATA_set <- cbind(DATA_x, DATA_y, SUBJECTS_data)
+
+######## Create a second, independent tidy data set with the average of each 
+########## variable for each activity and each subject
+# There are 66 numerical variables in the dataset and 2 qualitative 
+# (activity & subject). Therefore the means are taken from the numerical
+DATA_avg <- ddply(DATA_set, .(subject, activity), function(x) colMeans(x[, 1:66]))
+
+# Write the table to the work directory
+write.table(DATA_avg, "DATA_avg.txt", row.name=FALSE)
